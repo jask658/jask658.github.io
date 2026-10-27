@@ -1,0 +1,33 @@
+Butterfly motion technique references
+====================================
+The butterfly uses original procedural point surfaces and a local 3D body-axis hinge.
+Reference techniques: spanwise phase-lagged wing rotation/projection (Yoichi Kobayashi),
+and root-weighted wing deformation (Klevron). No external textures or models are used.
+
+https://github.com/ykob/sketch-threejs/blob/main/src/js/sketch/butterfly/glsl/butterfly.vs
+https://github.com/klevron/threejs-toys/blob/main/packages/toys/src/backgrounds/butterflies/index.js
+
+
+ykob/sketch-threejs
+MIT License
+
+Copyright (c) 2021 yoichi kobayashi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
