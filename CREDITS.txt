@@ -1,0 +1,20 @@
+JIACHENG ZHANG — Sources & credits
+
+Project media
+Underwater restoration: input examples are from the UIEB benchmark; restoration outputs and comparisons are from Jiacheng Zhang's undergraduate thesis, “水下浑浊图像复原方法研究”. UIEB: Chongyi Li et al., “An Underwater Image Enhancement Benchmark Dataset and Beyond”, IEEE Transactions on Image Processing, 2020. Dataset project: https://li-chongyi.github.io/proj_benchmark.html
+
+Robot Football: the field screenshot was supplied for this portfolio. The displayed enlargement is an FSRCNN-derived version. Platform information is attributed to RAICOM: https://www.raicom.com.cn/ . Strategy source and notices: https://github.com/jask658/robot-football-strategy
+
+Robotic Tetris: recognition and planning figures are reproduced from the team technical report “俄罗斯方块机器人-技术报告”. Recognition rates and calibration error are reported team results. The complete report is not distributed here.
+
+All-terrain robot: the competition video was supplied for this portfolio. The two stills are extracted from that same video. Competition details and personal contribution are drawn from Jiacheng Zhang's CV. The video is presented without cutting or re-encoding.
+
+Software and design references
+Phosphor Icons: Copyright (c) 2023 Phosphor Icons, MIT License. Full notice: PHOSPHOR-LICENSE.txt
+Butterfly motion references: Yoichi Kobayashi and Klevron. Reference URLs and retained notice: BUTTERFLY-NOTICES.txt
+Tori runtime uses Hermes Agent by Nous Research: https://github.com/NousResearch/hermes-agent
+
+Homepage quotation
+“Nothing in life is to be feared; it is only to be understood.” — attributed to Marie Curie.
+
+Credits identify sources; third-party materials remain subject to their respective rights and licences.
