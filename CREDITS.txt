@@ -10,6 +10,7 @@ Robotic Tetris: recognition and planning figures are reproduced from the team te
 All-terrain robot: the competition video was supplied for this portfolio. The two stills are extracted from that same video. Competition details and personal contribution are drawn from Jiacheng Zhang's CV. The video is presented without cutting or re-encoding.
 
 Software and design references
+Skill logos: Devicon v2.17.0 (MIT), https://github.com/devicons/devicon ; retained licence: assets/skills/DEVICON-LICENSE.txt. Logos identify the tools and remain trademarks of their respective owners. The CAD cube is a procedural line illustration.
 Phosphor Icons: Copyright (c) 2023 Phosphor Icons, MIT License. Full notice: PHOSPHOR-LICENSE.txt
 Butterfly motion references: Yoichi Kobayashi and Klevron. Reference URLs and retained notice: BUTTERFLY-NOTICES.txt
 Tori runtime uses Hermes Agent by Nous Research: https://github.com/NousResearch/hermes-agent

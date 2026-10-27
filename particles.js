@@ -43,8 +43,94 @@
   }
   return out;
  }
+ // DOM-bound ornaments use unit coordinates and their own deterministic sampler.
+ // They never consume the legacy random stream or recreate the shared particles.
+ const isAnchored=()=>form==='skilltree'||form==='vineframe';
+ function ornamentMask(name){
+  const strokes=[];
+  const curve=(p0,p1,p2,p3,weight=1)=>{
+   const length=Math.hypot(p1[0]-p0[0],p1[1]-p0[1])+Math.hypot(p2[0]-p1[0],p2[1]-p1[1])+Math.hypot(p3[0]-p2[0],p3[1]-p2[1]);
+   const steps=Math.max(12,Math.ceil(length*1800));
+   for(let k=0;k<=steps;k++){const t=k/steps,q=1-t;strokes.push({x:q*q*q*p0[0]+3*q*q*t*p1[0]+3*q*t*t*p2[0]+t*t*t*p3[0],y:q*q*q*p0[1]+3*q*q*t*p1[1]+3*q*t*t*p2[1]+t*t*t*p3[1],a:weight})}
+  };
+  const leaf=(base,tip,breadth=.009)=>{
+   const dx=tip[0]-base[0],dy=tip[1]-base[1],len=Math.hypot(dx,dy)||1,nx=-dy/len*breadth,ny=dx/len*breadth;
+   for(const side of [-1,1])curve(base,[base[0]+dx*.25+nx*side,base[1]+dy*.25+ny*side],[base[0]+dx*.72+nx*side,base[1]+dy*.72+ny*side],tip,.65);
+   curve(base,[base[0]+dx*.3,base[1]+dy*.3],[base[0]+dx*.7,base[1]+dy*.7],tip,.38);
+  };
+  if(name==='skilltree'){
+   // A gently braided trunk; all eight branches end at icon centers.
+   curve([.5,.98],[.465,.78],[.54,.55],[.5,.35]);
+   curve([.485,.98],[.505,.81],[.48,.57],[.5,.35],.55);
+   curve([.5,.87],[.57,.73],[.45,.52],[.5,.08]);
+   const trunkX=y=>{
+    let lo=0,hi=1;
+    for(let k=0;k<20;k++){const t=(lo+hi)/2,q=1-t,v=q*q*q*.98+3*q*q*t*.78+3*q*t*t*.55+t*t*t*.35;if(v>y)lo=t;else hi=t}
+    const t=(lo+hi)/2,q=1-t;return q*q*q*.5+3*q*q*t*.465+3*q*t*t*.54+t*t*t*.5;
+   };
+   for(const s of [-1,1]){
+    // Zero-offset branch bases meet the curved trunk, not a notional axis.
+    const p=(x,y)=>[x===0?trunkX(y):.5+s*x,y];
+    curve(p(0,.38),p(.035,.25),p(.21,.32),p(.28,.18));
+    curve(p(0,.52),p(.12,.48),p(.25,.56),p(.35,.43));
+    curve(p(0,.77),p(.1,.62),p(.18,.79),p(.26,.69));
+    // Fine parallel grain merges back into each principal bough.
+    curve(p(0,.56),p(.06,.39),p(.24,.54),p(.35,.43),.38);
+    curve(p(0,.43),p(.09,.3),p(.22,.34),p(.28,.18),.4);
+    curve(p(.005,.83),p(.08,.71),p(.19,.81),p(.26,.69),.42);
+    leaf(p(.12,.30),p(.17,.245),.008);
+    leaf(p(.18,.49),p(.22,.445),.008);
+    leaf(p(.13,.72),p(.17,.665),.009);
+    curve(p(0,.975),p(.04,.945),p(.085,.975),p(.12,.97),.55);
+   }
+  }else{
+   // Mirrored acanthus-like scrolls, never a rectangular dotted outline.
+   // The entire center remains empty; every curve lives in the border band.
+   for(const sx of [-1,1])for(const sy of [-1,1]){
+    const p=(x,y)=>[sx<0?x:1-x,sy<0?y:1-y];
+    const c=(a,b,d,e,w=1)=>curve(p(...a),p(...b),p(...d),p(...e),w);
+    const l=(a,b,w)=>leaf(p(...a),p(...b),w);
+    // Winding side and shoulder stems join at their reflected midpoints.
+    c([.035,.5],[.015,.38],[.072,.25],[.038,.13]);
+    c([.038,.13],[.015,.055],[.07,.022],[.15,.04]);
+    c([.15,.04],[.26,.075],[.35,.018],[.5,.035]);
+    c([.045,.5],[.025,.38],[.083,.25],[.049,.145],.4);
+    c([.15,.05],[.28,.085],[.37,.027],[.5,.045],.42);
+    // Small inward spirals at corner and halfway down the side.
+    c([.04,.15],[.105,.18],[.127,.086],[.087,.078],.85);
+    c([.087,.078],[.055,.068],[.058,.115],[.084,.108],.72);
+    c([.037,.34],[.095,.33],[.09,.25],[.06,.263],.8);
+    c([.06,.263],[.042,.275],[.064,.3],[.074,.284],.65);
+    c([.19,.05],[.19,.105],[.29,.105],[.285,.065],.8);
+    c([.285,.065],[.28,.043],[.245,.06],[.26,.077],.65);
+    // Lanceolate leaves and slender, curved thorns, not arrowheads.
+    l([.038,.19],[.073,.222],.009);
+    l([.04,.225],[.014,.19],.007);
+    l([.032,.405],[.066,.368],.009);
+    l([.031,.445],[.012,.409],.006);
+    l([.12,.038],[.165,.015],.007);
+    l([.32,.045],[.356,.078],.009);
+    l([.385,.035],[.425,.014],.006);
+    c([.045,.365],[.022,.354],[.018,.34],[.016,.327],.6);
+    c([.33,.043],[.347,.029],[.35,.019],[.348,.012],.6);
+    // A restrained central crest: two curled lobes and a pointed bud.
+    c([.5,.035],[.475,.01],[.446,.033],[.466,.056],.8);
+    c([.466,.056],[.48,.069],[.489,.046],[.5,.035],.65);
+   }
+   leaf([.5,.053],[.5,.012],.008);
+   leaf([.5,.947],[.5,.988],.008);
+  }
+  // Stratified traversal keeps fine details at both supported populations.
+  const out=[];
+  for(let i=0;i<count;i++){
+   const p=strokes[Math.min(strokes.length-1,Math.floor((i+.5)*strokes.length/count))];
+   out.push({x:p.x,y:p.y,a:.36+p.a*.56,z:0,part:name});
+  }
+  return out;
+ }
  function mask(name){
   if(masks[name])return masks[name];
+  if(name==='skilltree'||name==='vineframe')return masks[name]=ornamentMask(name);
   if(name==='butterfly')return masks[name]=butterflyMask();
   if(name==='tori'){
    const raw=atob(window.TORI_POINT_MASK||''),bytes=Uint8Array.from(raw,ch=>ch.charCodeAt(0)),total=bytes.length/4,out=[];
@@ -105,7 +191,19 @@
  const particles=Array.from({length:count},(_,i)=>({x:width*.45,y:height*.4,fromX:0,fromY:0,alpha:0,r:.65+random()*.7,phase:random()*Math.PI*2,delay:random()*.23,depth:random()}));
  const paintOrder=Array.from({length:count},(_,i)=>i);
  let points=mask(form),anchor={x:width*.72,y:height*.42,scale:Math.min(width*.46,height*.64)};
+ function layoutOrnament(){
+  const el=document.querySelector(form==='skilltree'?'.skill-tree':'.recent-frame');
+  const r=el?.getBoundingClientRect();
+  // Project Index previews need neither panel nor stage-card to exist.
+  const rect=r&&r.width>0&&r.height>0?r:{left:width<761?width*.08:width*.51,top:height*.22,width:width*(width<761?.84:.43),height:height*.65};
+  const inset=form==='vineframe'?Math.min(12,rect.width*.025,rect.height*.025):0;
+  anchor={x:rect.left+inset,y:rect.top+inset,scale:1,scaleX:rect.width-inset*2,scaleY:rect.height-inset*2};
+ }
  function layout(){
+  if(isAnchored()){
+   width=innerWidth;height=innerHeight;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+   layoutOrnament();if(paused&&!morphing)render(performance.now());return;
+  }
   width=innerWidth;height=innerHeight;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
   const side=document.body.dataset.side;
   if(width<761){const r=document.querySelector('.scene-copy').getBoundingClientRect();anchor={x:width*.52,y:r.bottom+119,scale:Math.min(width*.9,410)*(form==='butterfly'?.82:1)}}
@@ -113,6 +211,7 @@
   if(paused&&!morphing)render(performance.now());
  }
  function destination(p,i,time){
+  if(isAnchored())return {x:anchor.x+p.x*anchor.scaleX,y:anchor.y+p.y*anchor.scaleY,depth:0};
   const resting=form==='butterfly';
   let px=p.x,py=p.y;
   let viewDepth=0;
@@ -152,6 +251,7 @@
   schedule();
  }
  function render(now){
+  if(isAnchored())layoutOrnament();
   if(!paused&&lastPoseFrame)poseTime+=Math.min(now-lastPoseFrame,60);lastPoseFrame=now;
   ctx.clearRect(0,0,width,height);
   let done=true;
@@ -167,7 +267,7 @@
     const ribbon=(p.phase/Math.PI-1)*22+Math.sin(p.phase)*18;
     if(travel){
      // One current, not independently interpolated silhouettes: gather -> stream -> bloom.
-     const target={x:anchor.x+targetMean.x*anchor.scale,y:anchor.y+targetMean.y*anchor.scale};
+     const target={x:anchor.x+targetMean.x*(anchor.scaleX??anchor.scale),y:anchor.y+targetMean.y*(anchor.scaleY??anchor.scale)};
      const gather=smooth(0,.28,t),bloom=smooth(.70,1,t);
      const flow=smooth(.10,.90,t),q=1-flow;
      // Continuous in-view transport: the curve joins the actual two anchors.
@@ -212,6 +312,7 @@
     const depthShade=point.side<0?.68:.92;
     ctx.fillStyle=`hsla(${hue},68%,${49+point.color*8}%,${p.alpha*depthShade})`;
    }
+   if(isAnchored())ctx.fillStyle=form==='skilltree'?`rgba(80,82,49,${p.alpha*(.56+p.depth*.32)})`:(i%5===0?`rgba(112,91,57,${p.alpha*.76})`:`rgba(83,87,53,${p.alpha*(.48+p.depth*.3)})`);
    if(form==='tori'){
     const palette=[[37,16,57],[67,35,101],[99,55,145],[135,82,184],[174,126,216]][point.color]||[99,55,145];
     ctx.fillStyle=`rgba(${palette[0]},${palette[1]},${palette[2]},${p.alpha*.9})`;
@@ -223,8 +324,10 @@
  function loop(now){raf=0;render(now);if(!document.hidden&&(!paused||morphing))schedule()}
  function schedule(){if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
  layout();particles.forEach((p,i)=>{p.x=width*.86+i/count*width*.12;p.y=height*.22+Math.sin(i/count*8)*14;p.fromX=p.x;p.fromY=p.y});morph(form,true);
- window.ParticleGuide={morph,layout,snapshot(){return {form,morphing,poseTime,particles:particles.map((p,i)=>({x:p.x,y:p.y,alpha:p.alpha,depth:p.viewDepth||0,part:points[i].part||form}))}},setPaused(value){paused=value;if(paused)morph(form,false);else schedule();document.dispatchEvent(new Event('motionchange'))},get paused(){return paused},forms:['butterfly','dolphin','football','tetris','rover','tori']};
- addEventListener('resize',layout);addEventListener('scroll',()=>{if(width<761){layout();if(paused)render(performance.now())}},{passive:true});
+ window.ParticleGuide={morph,layout,snapshot(){return {form,morphing,poseTime,particles:particles.map((p,i)=>({x:p.x,y:p.y,alpha:p.alpha,depth:p.viewDepth||0,part:points[i].part||form}))}},setPaused(value){paused=value;if(paused)morph(form,false);else schedule();document.dispatchEvent(new Event('motionchange'))},get paused(){return paused},forms:['butterfly','dolphin','football','tetris','rover','tori','skilltree','vineframe']};
+ addEventListener('resize',layout);addEventListener('scroll',()=>{if(isAnchored()){layoutOrnament();render(performance.now())}else if(width<761){layout();if(paused)render(performance.now())}},{passive:true});
+ // Layout shifts (fonts, content, panel resizing) also align while motion is paused.
+ if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(()=>{if(isAnchored()){layoutOrnament();if(paused)render(performance.now())}});observer.observe(document.body)}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0}else schedule()});
  media.addEventListener('change',()=>{paused=media.matches;document.body.classList.toggle('motion-paused',paused);morph(form,!paused);document.dispatchEvent(new Event('motionchange'))});
 })();

@@ -4,7 +4,7 @@
  let navigating=false,lastFocus=null,swipe=null,pending=null;
  const about={
   profile:'<p class="intro">A Robotics Engineering graduate from the University of Shanghai for Science and Technology, now studying at the University of Manchester.</p><p class="about-secondary">Interested in industry opportunities across perception, sensor fusion, motion planning, decision-making and systems integration.</p>',
-  toolkit:'<div class="toolkit-line"><b>Software</b><span>Python · NumPy · Git · Linux</span></div><div class="toolkit-line"><b>Robotics & vision</b><span>ROS 2 · OpenCV</span></div><div class="toolkit-line"><b>Design</b><span>SolidWorks · Siemens NX</span></div>'
+  toolkit:'<div class="toolkit-line"><b>Programming</b><span>C++ · C · Python<br>Git · Linux</span></div><div class="toolkit-line"><b>Robot systems</b><span>ROS · Arduino · sensor integration<br>Coordinate transforms · pick-and-place</span></div><div class="toolkit-line"><b>Computer vision</b><span>OpenCV · camera &amp; hand–eye calibration<br>Colour segmentation · contour detection</span></div><div class="toolkit-line"><b>Design &amp; simulation</b><span>MATLAB · Simulink<br>SolidWorks · Siemens NX</span></div><div class="toolkit-line"><b>Agent systems</b><span>Typed memory · selective recall<br>State machines · regression testing</span></div>'
   };
   function setAboutMode(mode,push=false){
    if(currentRoute!=='about.html')return false;
@@ -18,6 +18,7 @@
   }
  function syncMotion(){const p=window.ParticleGuide?.paused||false;document.body.classList.toggle('motion-paused',p);const b=document.getElementById('motion-toggle');b.setAttribute('aria-pressed',String(p));b.innerHTML=p?'Resume motion <span>▷</span>':'Pause motion <span>Ⅱ</span>'}
  function init(){
+  if(currentRoute!=='about.html')document.body.classList.remove('contact-mode');
   const dialog=document.getElementById('case-dialog');
   document.querySelector('[data-open-case]')?.addEventListener('click',e=>{lastFocus=e.currentTarget;dialog.showModal()});
   document.querySelector('.close-dialog')?.addEventListener('click',()=>dialog.close());
@@ -50,14 +51,14 @@
   });
   document.querySelectorAll('[data-dehaze-reveal]').forEach(button=>button.addEventListener('click',()=>button.setAttribute('aria-pressed',String(button.getAttribute('aria-pressed')!=='true'))));
  }
- const routes=['index.html','projects.html','underwater-vision.html','robot-football.html','robotic-tetris.html','all-terrain-robot.html','tori.html','about.html'];
+ const routes=['index.html','projects.html','underwater-vision.html','robot-football.html','robotic-tetris.html','all-terrain-robot.html','tori.html','recent-works.html','about.html'];
  let currentRoute=location.pathname.split('/').pop()||'index.html',wheelSum=0,wheelTime=0;
  const normalize=url=>url.pathname.split('/').pop()||'index.html';
  // Snapshot only scene content, never controls/dialogs. Viewport geometry keeps
  // the fixed card/caption and flowing copy rigidly together in one moving layer.
  function sceneLayer(scene){
   const layer=document.createElement('div');layer.className='chapter-layer';layer.inert=true;layer.setAttribute('aria-hidden','true');
-  scene.querySelectorAll('.scene-copy,.stage-card,.scene-coordinate,.dehaze-gallery,.football-visual,.tetris-visual').forEach(el=>{
+  scene.querySelectorAll('.scene-copy,.stage-card,.scene-coordinate,.dehaze-gallery,.football-visual,.tetris-visual,.skill-tree,.recent-content').forEach(el=>{
    if(getComputedStyle(el).display==='none')return;
    const copy=el.cloneNode(true),r=el.getBoundingClientRect(),style=getComputedStyle(el);
    // A snapshot must keep its source appearance after body.dataset.scene changes.
