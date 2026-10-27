@@ -9,8 +9,10 @@ Robotic Tetris: recognition and planning figures are reproduced from the team te
 
 All-terrain robot: the competition video was supplied for this portfolio. The two stills are extracted from that same video. Competition details and personal contribution are drawn from Jiacheng Zhang's CV. The video is presented without cutting or re-encoding.
 
+Recent Works: “Above the Sewer” is Jiacheng Zhang's final AIGC-assisted coursework film, reproduced without editing. Its references appear in the film; English captions accompany the video. The hole-detection loop uses 16 sampled frames from the user's “孔位” demonstration recording, cropped to the detection view. The entrepreneurship text summarises the deep-sea intelligent welding venture concept; the business plan itself is not distributed.
+
 Software and design references
-Skill logos: Devicon v2.17.0 (MIT), https://github.com/devicons/devicon ; retained licence: assets/skills/DEVICON-LICENSE.txt. Logos identify the tools and remain trademarks of their respective owners. The CAD cube is a procedural line illustration.
+Skill logos: Devicon v2.17.0 (MIT), https://github.com/devicons/devicon ; retained licence: assets/skills/DEVICON-LICENSE.txt. Logos identify the tools and remain trademarks of their respective owners. The SolidWorks node uses an original SW monogram, not an official product logo.
 Phosphor Icons: Copyright (c) 2023 Phosphor Icons, MIT License. Full notice: PHOSPHOR-LICENSE.txt
 Butterfly motion references: Yoichi Kobayashi and Klevron. Reference URLs and retained notice: BUTTERFLY-NOTICES.txt
 Tori runtime uses Hermes Agent by Nous Research: https://github.com/NousResearch/hermes-agent

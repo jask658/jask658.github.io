@@ -17,7 +17,14 @@
    window.ParticleGuide?.layout();return true;
   }
  function syncMotion(){const p=window.ParticleGuide?.paused||false;document.body.classList.toggle('motion-paused',p);const b=document.getElementById('motion-toggle');b.setAttribute('aria-pressed',String(p));b.innerHTML=p?'Resume motion <span>▷</span>':'Pause motion <span>Ⅱ</span>'}
+ function activateSceneMedia(){
+  document.querySelectorAll('.scene video[data-recent-loop]').forEach(video=>{
+   video.muted=true;video.loop=true;video.playsInline=true;
+   video.play().catch(()=>{}); // Autoplay policy may require a user gesture.
+  });
+ }
  function init(){
+  if(!navigating)activateSceneMedia();
   if(currentRoute!=='about.html')document.body.classList.remove('contact-mode');
   const dialog=document.getElementById('case-dialog');
   document.querySelector('[data-open-case]')?.addEventListener('click',e=>{lastFocus=e.currentTarget;dialog.showModal()});
@@ -59,7 +66,8 @@
  function sceneLayer(scene){
   const layer=document.createElement('div');layer.className='chapter-layer';layer.inert=true;layer.setAttribute('aria-hidden','true');
   scene.querySelectorAll('.scene-copy,.stage-card,.scene-coordinate,.dehaze-gallery,.football-visual,.tetris-visual,.skill-tree,.recent-content').forEach(el=>{
-   if(getComputedStyle(el).display==='none')return;
+   // Skills belong to the settled chapter, never either travelling snapshot.
+   if(el.matches('.skill-tree')||getComputedStyle(el).display==='none')return;
    const copy=el.cloneNode(true),r=el.getBoundingClientRect(),style=getComputedStyle(el);
    // A snapshot must keep its source appearance after body.dataset.scene changes.
    // Freeze computed styles before detaching from ancestor/ID-dependent selectors.
@@ -68,12 +76,17 @@
     const computed=getComputedStyle(source),target=copies[i];
     for(const property of computed)target.style.setProperty(property,computed.getPropertyValue(property));
     target.style.animation='none';target.style.transition='none';
+    // A used pixel height is not equivalent to height:auto for margin collapse.
+    if(source.computedStyleMap?.().get('height')?.toString()==='auto'&&!source.matches('img,video,svg,canvas'))target.style.height='auto';
+    if(target.matches('video')){target.removeAttribute('autoplay');target.autoplay=false;target.pause()}
    });
    const panel=copy.querySelector('#about-panel');if(panel)panel.classList.add('about-panel-snapshot');
    copy.removeAttribute('id');copy.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
-   // offset dimensions retain the card's rotation without rotating its bounding box twice.
-   const w=el.offsetWidth,h=el.offsetHeight;
-   Object.assign(copy.style,{position:'absolute',left:`${r.left+(r.width-w)/2}px`,top:`${r.top+(r.height-h)/2}px`,width:`${w}px`,height:`${h}px`,maxWidth:'none',margin:'0',transform:style.transform,animation:'none',transition:'none'});
+   // Preserve fractional border-box dimensions; offsetWidth/Height round them.
+   // Clear the frozen relative insets/alignment: bottom:0 + align-self:center
+   // otherwise re-centres an absolute snapshot in the viewport's remaining space.
+   const w=parseFloat(style.width),h=parseFloat(style.height);
+   Object.assign(copy.style,{position:'absolute',left:`${r.left+(r.width-w)/2}px`,top:`${r.top+(r.height-h)/2}px`,right:'auto',bottom:'auto',alignSelf:'auto',width:`${w}px`,height:`${h}px`,maxWidth:'none',margin:'0',transform:style.transform,animation:'none',transition:'none'});
    layer.append(copy);
   });
   document.body.append(layer);return layer;
@@ -99,6 +112,11 @@
    const response=await fetch(url.href,{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Page unavailable');
    const next=new DOMParser().parseFromString(await response.text(),'text/html');if(!next.querySelector('main .scene')||!next.querySelector('header')||!next.body.dataset.form)throw Error('Missing page content');
    const animate=!reduced.matches&&!window.ParticleGuide?.paused;
+   // Freeze geometry only after the currently used web fonts have settled.
+   await document.fonts.ready;
+   // Disable declarative autoplay before insertion; only the settled scene plays.
+   next.querySelectorAll('video').forEach(video=>{video.removeAttribute('autoplay');video.autoplay=false});
+   document.querySelectorAll('main video').forEach(video=>video.pause());
    const oldLayer=animate?sceneLayer(document.querySelector('.scene')):null;
    const nextStyle=next.querySelector('link[rel="stylesheet"]'),currentStyle=document.querySelector('link[rel="stylesheet"]');
    if(nextStyle&&currentStyle&&nextStyle.href!==currentStyle.href){
@@ -108,12 +126,17 @@
    document.body.dataset.scene=next.body.dataset.scene;document.body.dataset.form=next.body.dataset.form;document.body.dataset.side=next.body.dataset.side;document.body.dataset.previous=next.body.dataset.previous||'';document.body.dataset.next=next.body.dataset.next||'';
    currentRoute=normalize(url);document.title=next.title;if(push)history.pushState({},'',url.href);
    window.scrollTo({top:0,behavior:'instant'});init();
-   const scene=document.querySelector('.scene'),newLayer=animate?sceneLayer(scene):null;
+   const scene=document.querySelector('.scene');
+   // A newly introduced font can change intrinsic widths after cloning. Keep the
+   // live destination hidden, trigger its font requests, then capture final geometry.
+   scene.style.opacity='0';void scene.offsetHeight;await document.fonts.ready;
+   const newLayer=animate?sceneLayer(scene):null;
+   // Opacity suppresses the entire subtree, even descendants with visibility:visible.
    if(animate)scene.style.visibility='hidden';
    const clock={start:performance.now(),duration:1600};
    window.ParticleGuide?.morph(next.body.dataset.form,true,{travel:true,direction,clock});
    if(animate)await moveChapters(oldLayer,newLayer,direction,clock);
-   scene.style.visibility='';
+   scene.style.opacity='';scene.style.visibility='';activateSceneMedia();
    document.querySelector('main').focus({preventScroll:true});
   }catch(error){
    // Keep the current page and its controls; a failed fetch is not a redirect.
@@ -132,7 +155,7 @@
  });
  addEventListener('popstate',()=>{const url=new URL(location.href);if(normalize(url)===currentRoute&&currentRoute==='about.html')setAboutMode(url.hash==='#contact'?'contact':'skills');else navigate(url,false)});
  document.addEventListener('keydown',e=>{
-  if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.shiftKey||document.querySelector('dialog[open]')||e.target.closest('button,input,textarea,select,[role="tablist"]'))return;
+  if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.shiftKey||document.querySelector('dialog[open]')||e.target.closest('button,input,textarea,select,video,[role="tablist"]'))return;
   const next=e.key==='ArrowDown'||e.key==='ArrowRight',prev=e.key==='ArrowUp'||e.key==='ArrowLeft';if(!next&&!prev)return;
   const direction=next?1:-1;if(chapterTarget(direction)||aboutStepAvailable(direction)){e.preventDefault();if(!e.repeat)flip(direction)}
  });
